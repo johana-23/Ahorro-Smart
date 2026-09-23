@@ -18,8 +18,6 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
      * @return array<string, string>
      */
     protected function casts(): array
@@ -29,4 +27,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    
+    public function perfil()
+    {
+        return $this->hasOne(\App\Models\Perfil::class, 'usuario_idusuario');
+    }
+    
+    public function metasAhorro()
+    {
+        return $this->hasMany(\App\Models\MetaAhorro::class, 'usuario_idusuario');
+    }
 }
+
