@@ -16,7 +16,7 @@ class PerfilRequest extends FormRequest
         return [
             'ingresos_aproximados' => ['required', 'numeric', 'min:0'],
             'gastos_mensuales' => ['required', 'numeric', 'min:0'],
-            'dinero_bolsillo' => ['required', 'numeric', 'min:0'],
+
         ];
     }
 
@@ -27,8 +27,7 @@ class PerfilRequest extends FormRequest
             'ingresos_aproximados.numeric' => 'Los ingresos deben ser un número.',
             'gastos_mensuales.required' => 'Ingresa tus gastos mensuales aproximados.',
             'gastos_mensuales.numeric' => 'Los gastos deben ser un número.',
-            'dinero_bolsillo.required' => 'Ingresa tu dinero de bolsillo disponible.',
-            'dinero_bolsillo.numeric' => 'El dinero de bolsillo debe ser un número.',
+
         ];
     }
 }
