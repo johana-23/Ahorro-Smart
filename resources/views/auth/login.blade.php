@@ -3,12 +3,23 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('smart-ahorro-theme') || 'light');
+    </script>
     <title>Iniciar sesión - Smart Ahorro</title>
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
   </head>
   <body>
+    <div class="auth-theme-bar">
+      <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+        <i class="fa-solid fa-moon" data-theme-icon></i>
+        <span data-theme-text>Modo oscuro</span>
+      </button>
+    </div>
+
     <div class="auth-shell">
       <div class="auth-panel">
         <div class="auth-box">
@@ -55,6 +66,7 @@
       </div>
     </div>
 
+    <script src="{{ asset('js/theme-and-currency.js') }}"></script>
     <script>
       document.querySelectorAll('.toggle-password').forEach((icon) => {
         icon.addEventListener('click', () => {

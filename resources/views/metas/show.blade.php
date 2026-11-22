@@ -28,9 +28,12 @@
       @else
         <form method="POST" action="{{ route('metas.aportar', $meta) }}">
           @csrf
-          <div class="campo">
+         <div class="campo">
             <label for="monto">Monto a aportar</label>
-            <input type="number" step="0.01" min="0.01" name="monto" id="monto" placeholder="0" required />
+            <div class="currency-field">
+              <span class="currency-prefix">$ COP</span>
+              <input type="text" inputmode="decimal" data-currency-input name="monto" id="monto" placeholder="0" required />
+            </div>
           </div>
           <button type="submit" class="btn-gradiente" style="width:100%;">Aportar 🌱</button>
         </form>

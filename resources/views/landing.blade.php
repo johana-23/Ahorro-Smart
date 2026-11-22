@@ -3,15 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      document.documentElement.setAttribute('data-theme', localStorage.getItem('smart-ahorro-theme') || 'light');
+    </script>
     <title>Smart Ahorro — Ahorra con hábito, no con fuerza de voluntad</title>
     <meta name="description" content="Registra tus ingresos y gastos, define metas de ahorro y deja que el semáforo financiero y la planta de ahorro te muestren si vas por buen camino." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}" />
     <style>
-      /* Único estilo propio de esta página: aplicar la tipografía de títulos.
-         El color y la estructura ya viven en theme.css / layout.css. */
       h1, h2, .landing-nav-logo span { font-family: 'Sora', 'Segoe UI', sans-serif; letter-spacing: -0.02em; }
     </style>
   </head>
@@ -24,6 +26,10 @@
           <span>Smart Ahorro</span>
         </div>
         <div class="landing-nav-links">
+          <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+            <i class="fa-solid fa-moon" data-theme-icon></i>
+            <span data-theme-text>Modo oscuro</span>
+          </button>
           <a href="{{ route('login') }}" class="link">Iniciar sesión</a>
           <a href="{{ route('register') }}" class="btn-primario">Crear cuenta</a>
         </div>
@@ -128,5 +134,6 @@
       </footer>
     </div>
 
+    <script src="{{ asset('js/theme-and-currency.js') }}"></script>
   </body>
 </html>
