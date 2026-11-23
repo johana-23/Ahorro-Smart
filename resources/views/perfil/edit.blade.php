@@ -25,9 +25,6 @@
             <p style="margin:6px 0 0 0; font-size:20px; font-weight:700;">
               ${{ number_format($perfil->dinero_bolsillo, 0, ',', '.') }}
             </p>
-
-              {{-- se calcula apartir de los : ingresos aproximados − gastos mensuales --}}
-
           </x-card>
         </div>
 
@@ -38,9 +35,6 @@
               style="margin:6px 0 0 0; font-size:26px; font-weight:700; color: {{ $perfil->saldo_actual >= 0 ? 'var(--semaforo-verde)' : 'var(--semaforo-rojo)' }};">
               ${{ number_format($perfil->saldo_actual, 0, ',', '.') }}
             </p>
-
-              {{-- se calcula apartir del Dinero de bolsillo + ingresos − gastos registrados --}}
-
           </x-card>
         </div>
       @endif
@@ -53,17 +47,22 @@
         <div class="campo">
           <label for="ingresos_aproximados">Ingresos aproximados</label>
           <small>Total que recibes mensualmente</small>
-          <input type="number" step="0.01" min="0" placeholder="0" name="ingresos_aproximados" id="ingresos_aproximados"
-            value="{{ old('ingresos_aproximados', $perfil->ingresos_aproximados ?? '') }}" />
+          <div class="currency-field">
+            <span class="currency-prefix">$ COP</span>
+            <input type="text" inputmode="decimal" data-currency-input placeholder="0" name="ingresos_aproximados" id="ingresos_aproximados"
+              value="{{ old('ingresos_aproximados', $perfil->ingresos_aproximados ?? '') }}" />
+          </div>
         </div>
 
         <div class="campo">
           <label for="gastos_mensuales">Gastos mensuales aproximados</label>
           <small>Total de gastos mensuales</small>
-          <input type="number" step="0.01" min="0" placeholder="0" name="gastos_mensuales" id="gastos_mensuales"
-            value="{{ old('gastos_mensuales', $perfil->gastos_mensuales ?? '') }}" />
+          <div class="currency-field">
+            <span class="currency-prefix">$ COP</span>
+            <input type="text" inputmode="decimal" data-currency-input placeholder="0" name="gastos_mensuales" id="gastos_mensuales"
+              value="{{ old('gastos_mensuales', $perfil->gastos_mensuales ?? '') }}" />
+          </div>
         </div>
-
 
         @if ($errors->any())
           <x-alerta tipo="error">

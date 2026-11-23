@@ -17,7 +17,10 @@
 
       <div class="campo">
         <label for="monto_objetivo">Monto objetivo</label>
-        <input type="number" step="0.01" min="1" name="monto_objetivo" id="monto_objetivo" value="{{ old('monto_objetivo') }}" required />
+        <div class="currency-field">
+          <span class="currency-prefix">$ COP</span>
+          <input type="text" inputmode="decimal" data-currency-input step="0.01" min="1" name="monto_objetivo" id="monto_objetivo" value="{{ old('monto_objetivo') }}" required />
+        </div>
       </div>
 
       <div class="campo">

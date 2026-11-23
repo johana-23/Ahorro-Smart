@@ -10,8 +10,11 @@
       @csrf
 
       <div class="campo">
-        <label for="monto">Monto</label>
-        <input type="number" step="0.01" min="0.01" name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
+        <label for="monto_objetivo">Monto objetivo</label>
+        <div class="currency-field">
+          <span class="currency-prefix">$ COP</span>
+          <input type="text" inputmode="decimal" data-currency-input name="monto_objetivo" id="monto_objetivo" value="{{ old('monto_objetivo') }}" placeholder="0" required />
+        </div>
       </div>
 
       <div class="campo">
