@@ -34,7 +34,7 @@
       @endif
 
       <button type="submit" class="btn-primario">Guardar cambios</button>
-      <a href="{{ route('ingresos.index') }}" class="btn-secundario">Cancelar</a>
+      <a href="{{ route('movimientos.index', ['tab' => 'ingresos']) }}" class="btn-secundario">Cancelar</a>
     </form>
   </x-card>
 @endsection

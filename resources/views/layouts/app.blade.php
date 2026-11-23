@@ -35,11 +35,8 @@
           <a href="{{ route('perfil.edit') }}" class="{{ request()->routeIs('perfil.*') ? 'active' : '' }}">
             <i class="fa-regular fa-user"></i> Mi Perfil
           </a>
-          <a href="{{ route('ingresos.index') }}" class="{{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-arrow-up"></i> Ingresos
-          </a>
-          <a href="{{ route('gastos.index') }}" class="{{ request()->routeIs('gastos.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-arrow-down"></i> Gastos
+          <a href="{{ route('movimientos.index') }}" class="{{ request()->routeIs('movimientos.*', 'ingresos.*', 'gastos.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-right-left"></i> Movimientos
           </a>
           <a href="{{ route('metas.index') }}" class="{{ request()->routeIs('metas.*') ? 'active' : '' }}">
             <i class="fa-solid fa-bullseye"></i> Metas de ahorro

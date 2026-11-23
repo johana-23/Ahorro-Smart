@@ -10,10 +10,10 @@
       @csrf
 
       <div class="campo">
-        <label for="monto_objetivo">Monto objetivo</label>
+        <label for="monto">Monto</label>
         <div class="currency-field">
           <span class="currency-prefix">$ COP</span>
-          <input type="text" inputmode="decimal" data-currency-input name="monto_objetivo" id="monto_objetivo" value="{{ old('monto_objetivo') }}" placeholder="0" required />
+          <input type="text" inputmode="decimal" data-currency-input name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
         </div>
       </div>
 
@@ -62,7 +62,7 @@
       @endif
 
       <button type="submit" class="btn-primario">Guardar gasto</button>
-      <a href="{{ route('gastos.index') }}" class="btn-secundario">Cancelar</a>
+      <a href="{{ route('movimientos.index', ['tab' => 'gastos']) }}" class="btn-secundario">Cancelar</a>
     </form>
   </x-card>
 @endsection
