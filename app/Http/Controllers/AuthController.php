@@ -4,32 +4,61 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
+use App\Services\Api\AuthApiService;
+use App\Services\Api\DuplicateApiEmailException;
+use App\Services\Api\InvalidApiCredentialsException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class AuthController extends Controller
 {
+    public function __construct(
+        private readonly AuthApiService $auth
+    ) {}
+
     public function showLogin()
     {
         return view('auth.login');
     }
 
-  
     public function login(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        $data = $request->validated();
 
-        if (Auth::attempt($credentials)) {
+        try {
+            $result = $this->auth->login(
+                $data['email'],
+                $data['password']
+            );
+
             $request->session()->regenerate();
 
-            return redirect()->intended(route('dashboard'));
-        }
+            $request->session()->put(
+                'spring_auth.access_token',
+                $result['accessToken']
+            );
 
-        return back()
-            ->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.'])
-            ->onlyInput('email');
+            return redirect()->route('dashboard');
+
+        } catch (InvalidApiCredentialsException $e) {
+            return back()
+                ->withErrors([
+                    'email' => 'Correo o contraseña incorrectos.',
+                ])
+                ->onlyInput('email');
+
+        } catch (Throwable $e) {
+            Log::warning('Error en inicio de sesión API', [
+                'exception' => get_class($e),
+            ]);
+
+            return back()
+                ->withErrors([
+                    'email' => 'El servicio de autenticación no está disponible.',
+                ])
+                ->onlyInput('email');
+        }
     }
 
     public function showRegister()
@@ -37,26 +66,46 @@ class AuthController extends Controller
         return view('auth.register');
     }
 
-    /**
-     * RF-001: Registro de usuarios.
-     */
     public function register(RegisterRequest $request)
     {
-        $user = User::create([
-            'name' => $request->validated('name'),
-            'email' => $request->validated('email'),
-            'password' => Hash::make($request->validated('password')),
-        ]);
+        $data = $request->validated();
 
-        Auth::login($user);
+        try {
+            $this->auth->register(
+                $data['name'],
+                $data['email'],
+                $data['password']
+            );
 
-        return redirect()->route('dashboard');
+            return redirect()
+                ->route('login')
+                ->with(
+                    'status',
+                    'Cuenta creada correctamente. Inicia sesión.'
+                );
+
+        } catch (DuplicateApiEmailException $e) {
+            return back()
+                ->withErrors([
+                    'email' => 'El correo electrónico ya está registrado.',
+                ])
+                ->onlyInput('name', 'email');
+
+        } catch (Throwable $e) {
+            Log::warning('Error en registro API', [
+                'exception' => get_class($e),
+            ]);
+
+            return back()
+                ->withErrors([
+                    'email' => 'No fue posible completar el registro.',
+                ])
+                ->onlyInput('name', 'email');
+        }
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
-
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 

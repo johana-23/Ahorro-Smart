@@ -11,10 +11,7 @@ class RegisterRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Mismas reglas que tenías en register.js, ahora validadas
-     * en el servidor (RF-002: Validación de datos de registro).
-     */
+    
     public function rules(): array
     {
         return [
