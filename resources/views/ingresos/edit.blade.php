@@ -9,7 +9,7 @@
     <form method="POST" action="{{ route('ingresos.update', $ingreso) }}">
       @csrf @method('PUT')
 
-     <div class="campo">
+      <div class="campo">
         <label for="monto">Monto</label>
         <div class="currency-field">
           <span class="currency-prefix">$ COP</span>
@@ -34,7 +34,7 @@
       @endif
 
       <button type="submit" class="btn-primario">Guardar cambios</button>
-      <a href="{{ route('ingresos.index') }}" class="btn-secundario">Cancelar</a>
+      <a href="{{ route('movimientos.index', ['tab' => 'ingresos']) }}" class="btn-secundario">Cancelar</a>
     </form>
   </x-card>
 @endsection

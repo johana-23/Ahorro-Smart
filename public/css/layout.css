@@ -179,3 +179,39 @@ body { margin: 0; }
   .header { gap: 14px; flex-wrap: wrap; }
   .usuario { flex-wrap: wrap; }
 }
+
+/* =========================================================
+   Pestañas del módulo unificado de Movimientos
+   ========================================================= */
+.movimientos-tabs {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  margin-bottom: 20px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.movimientos-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: calc(var(--radio) - 2px);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto-secundario);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.movimientos-tab:hover {
+  color: var(--texto-principal);
+  background: var(--fondo);
+}
+
+.movimientos-tab.active {
+  background: var(--primario);
+  color: #fff;
+}

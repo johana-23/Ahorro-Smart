@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\MetaAhorroController;
@@ -30,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 
+    Route::get('/movimientos', [MovimientoController::class, 'index'])->name('movimientos.index');
     Route::resource('ingresos', IngresoController::class)->except(['show']);
     Route::resource('gastos', GastoController::class)->except(['show']);
 
@@ -40,5 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notificaciones/{notificacion}/leida', [NotificacionController::class, 'marcarLeida'])->name('notificaciones.leida');
 
     Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index');
+    Route::get('/historial/exportar/pdf', [HistorialController::class, 'exportarPdf'])->name('historial.exportar.pdf');
+    Route::get('/historial/exportar/excel', [HistorialController::class, 'exportarExcel'])->name('historial.exportar.excel');
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
 });

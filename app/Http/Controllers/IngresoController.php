@@ -10,11 +10,7 @@ class IngresoController extends Controller
 {
     public function index()
     {
-        $ingresos = Ingreso::where('usuario_idusuario', Auth::id())
-            ->orderByDesc('fecha_ingreso')
-            ->paginate(10);
-
-        return view('ingresos.index', compact('ingresos'));
+        return redirect()->route('movimientos.index', ['tab' => 'ingresos']);
     }
 
     public function create()
@@ -29,7 +25,7 @@ class IngresoController extends Controller
             'usuario_idusuario' => Auth::id(),
         ]);
 
-        return redirect()->route('ingresos.index')->with('status', 'Ingreso registrado correctamente.');
+        return redirect()->route('movimientos.index', ['tab' => 'ingresos'])->with('status', 'Ingreso registrado correctamente.');
     }
 
     public function edit(Ingreso $ingreso)
@@ -45,7 +41,7 @@ class IngresoController extends Controller
 
         $ingreso->update($request->validated());
 
-        return redirect()->route('ingresos.index')->with('status', 'Ingreso actualizado correctamente.');
+        return redirect()->route('movimientos.index', ['tab' => 'ingresos'])->with('status', 'Ingreso actualizado correctamente.');
     }
 
     public function destroy(Ingreso $ingreso)
@@ -54,7 +50,7 @@ class IngresoController extends Controller
 
         $ingreso->delete();
 
-        return redirect()->route('ingresos.index')->with('status', 'Ingreso eliminado.');
+        return redirect()->route('movimientos.index', ['tab' => 'ingresos'])->with('status', 'Ingreso eliminado.');
     }
 
 
