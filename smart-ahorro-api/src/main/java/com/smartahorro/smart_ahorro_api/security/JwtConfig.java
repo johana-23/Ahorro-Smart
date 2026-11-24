@@ -26,6 +26,8 @@ import org.springframework.security.oauth2.jwt.JwtValidators;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+import com.smartahorro.smart_ahorro_api.service.TokenRevocationService;
+
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -56,7 +58,8 @@ public class JwtConfig {
 public JwtDecoder jwtDecoder(
         @Value("${smart-ahorro.jwt.public-key}") String publicKeyPath,
         @Value("${smart-ahorro.jwt.issuer}") String issuer,
-        @Value("${smart-ahorro.jwt.audience}") String audience
+        @Value("${smart-ahorro.jwt.audience}") String audience,
+        TokenRevocationService revocationService
 ) throws Exception {
 
     RSAPublicKey publicKey = loadPublicKey(publicKeyPath);
@@ -133,13 +136,22 @@ public JwtDecoder jwtDecoder(
                 new OAuth2Error("invalid_token", "Periodo de vigencia JWT invalido", null));
     };
 
+    OAuth2TokenValidator<Jwt> revocationValidator = jwt -> {
+        if (revocationService.isRevoked(jwt.getId())) {
+            return OAuth2TokenValidatorResult.failure(
+                    new OAuth2Error("invalid_token", "Token revocado", null));
+        }
+        return OAuth2TokenValidatorResult.success();
+    };
+
     decoder.setJwtValidator(
             new DelegatingOAuth2TokenValidator<>(
                     defaultValidator,
                     audienceValidator,
                     subjectValidator,
                     expirationRequiredValidator,
-                    lifetimeValidator
+                    lifetimeValidator,
+                    revocationValidator
             )
     );
 

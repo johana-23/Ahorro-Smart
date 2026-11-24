@@ -16,18 +16,24 @@ import com.smartahorro.smart_ahorro_api.dto.LoginRequest;
 import com.smartahorro.smart_ahorro_api.dto.LoginResponse;
 import com.smartahorro.smart_ahorro_api.service.AuthService;
 import com.smartahorro.smart_ahorro_api.service.JwtService;
+import com.smartahorro.smart_ahorro_api.service.TokenRevocationService;
 
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AuthController {
+
     private final AuthService authService;
     private final JwtService jwtService;
+    private final TokenRevocationService revocationService;
 
-    public AuthController(AuthService authService, JwtService jwtService) {
+    public AuthController(AuthService authService,
+            JwtService jwtService,
+            TokenRevocationService revocationService) {
         this.authService = authService;
         this.jwtService = jwtService;
+        this.revocationService = revocationService;
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -42,6 +48,16 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<AuthenticatedUserResponse> me(@AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.ok(new AuthenticatedUserResponse(Long.valueOf(jwt.getSubject())));
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .body(new AuthenticatedUserResponse(Long.parseLong(jwt.getSubject())));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal Jwt jwt) {
+        revocationService.revoke(jwt.getId(), jwt.getExpiresAt());
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .build();
     }
 }

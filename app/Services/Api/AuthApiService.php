@@ -20,12 +20,14 @@ final class AuthApiService
         }
         $data = $response->json();
         if (!is_array($data) || !is_string($data['accessToken'] ?? null)
-            || ($data['tokenType'] ?? null) !== 'Bearer') {
+            || ($data['tokenType'] ?? null) !== 'Bearer'
+            || !is_numeric($data['expiresIn'] ?? null)) {
             throw new RuntimeException('Respuesta de autenticacion invalida');
         }
         return $data;
     }
 
+    /** Devuelve ['userId' => int] o null si el token ya no es válido. */
     public function me(string $token): ?array
     {
         $response = $this->client->get('/api/v1/auth/me', $token);
@@ -36,18 +38,11 @@ final class AuthApiService
             throw new RuntimeException('No fue posible validar la sesion');
         }
         $data = $response->json();
-       if (!is_array($data)) {
+        if (!is_array($data) || !is_numeric($data['userId'] ?? null)) {
             return null;
         }
-
-        $userId = $data['userId'] ?? $data['userID'] ?? null;
-
-        if (!is_numeric($userId)) {
-            return null;
-        }
-
-        return ['userId' => (int) $userId];
-            }
+        return ['userId' => (int) $data['userId']];
+    }
 
     public function register(string $name, string $email, string $password): array
     {
@@ -61,5 +56,35 @@ final class AuthApiService
             throw new RuntimeException('No fue posible registrar el usuario');
         }
         return (array) $response->json();
+    }
+
+    /** Revoca el token en Spring Boot. 401 se considera ya cerrado. */
+    public function logout(string $token): void
+    {
+        $response = $this->client->post('/api/v1/auth/logout', [], $token);
+        if (!$response->successful() && $response->status() !== 401) {
+            throw new RuntimeException('No fue posible cerrar la sesion en la API');
+        }
+    }
+
+    public function forgotPassword(string $email): void
+    {
+        $response = $this->client->post('/api/v1/auth/forgot-password', ['email' => $email]);
+        if (!$response->successful()) {
+            throw new RuntimeException('No fue posible solicitar la recuperacion');
+        }
+    }
+
+    public function resetPassword(string $email, string $token, string $password): void
+    {
+        $response = $this->client->post('/api/v1/auth/reset-password', [
+            'email' => $email, 'token' => $token, 'password' => $password,
+        ]);
+        if ($response->status() === 400) {
+            throw new InvalidResetTokenException();
+        }
+        if (!$response->successful()) {
+            throw new RuntimeException('No fue posible restablecer la contrasena');
+        }
     }
 }

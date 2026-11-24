@@ -75,6 +75,11 @@ public class User {
         return updatedAt;
     }
 
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
+        this.updatedAt = java.time.LocalDateTime.now();
+    }
+
     public User(String name, String email, String password) {
     this.name = name;
     this.email = email;

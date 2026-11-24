@@ -29,10 +29,10 @@ Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'
 Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 
-
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+// 'auth' = sesión web de Laravel; 'spring.auth' = JWT de Spring Boot vigente en la sesión.
+Route::middleware(['auth', 'spring.auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
@@ -50,6 +50,3 @@ Route::middleware('auth')->group(function () {
     Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index');
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
 });
-
-// Rutas temporales para probar la autenticación mediante Spring Boot.
-require __DIR__.'/integracion_auth.php';
