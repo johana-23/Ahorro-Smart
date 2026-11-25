@@ -12,15 +12,14 @@ class RegisterRequest extends FormRequest
     }
 
     /**
-     * Mismas reglas que tenías en register.js, ahora validadas
-     * en el servidor (RF-002: Validación de datos de registro).
+     * La unicidad del correo la decide Spring Boot (HTTP 409), que es el responsable del registro.
      */
     public function rules(): array
     {
         return [
             'name' => ['required', 'string', 'min:4', 'max:100'],
-            'email' => ['required', 'string', 'email', 'max:150', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'email' => ['required', 'string', 'email', 'max:150'],
+            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
         ];
     }
 
@@ -31,9 +30,9 @@ class RegisterRequest extends FormRequest
             'name.min' => 'El nombre debe tener al menos 4 caracteres.',
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'Ingresa un correo electrónico válido.',
-            'email.unique' => 'Este correo ya está registrado.',
             'password.required' => 'La contraseña es obligatoria.',
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede superar 72 caracteres.',
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ];
     }

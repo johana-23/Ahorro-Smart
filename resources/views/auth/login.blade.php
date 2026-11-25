@@ -46,7 +46,7 @@
               <i class="bi bi-eye-fill toggle-password" data-target="password"></i>
             </div>
 
-            <a href="#" class="auth-forgot">¿Olvidaste la contraseña?</a>
+            <a href="{{ route('password.request') }}" class="auth-forgot">¿Olvidaste la contraseña?</a>
 
             @if ($errors->any())
               <x-alerta tipo="error">

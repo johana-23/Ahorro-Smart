@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'smart_ahorro_api' => [
+        'url' => env('SMART_AHORRO_API_URL', 'http://127.0.0.1:8080'),
+    ],
+
 ];

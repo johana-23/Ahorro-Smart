@@ -10,6 +10,7 @@ use App\Http\Controllers\MetaAhorroController;
 use App\Http\Controllers\NotificacionController;
 use App\Http\Controllers\HistorialController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\PasswordResetController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -23,9 +24,16 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
+
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware('auth')->group(function () {
+// 'auth' = sesión web de Laravel; 'spring.auth' = JWT de Spring Boot vigente en la sesión.
+Route::middleware(['auth', 'spring.auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
