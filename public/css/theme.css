@@ -1,4 +1,3 @@
-
 :root {
   /* Marca */
   --primario: #00D084;
@@ -13,7 +12,7 @@
   --texto-principal: #0F172A;
   --texto-secundario: #64748B;
 
-  /* Sidebar en modo oscuro (contraste "premium") */
+  /* Sidebar */
   --sidebar-fondo: #0F172A;
   --sidebar-texto: #F1F5F9;
   --sidebar-texto-secundario: #94A3B8;
@@ -37,9 +36,45 @@
   --sombra: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
-body {
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --fondo: #0B1220;
+  --superficie: #111C2E;
+  --borde: #2A3A50;
+  --texto-principal: #F1F5F9;
+  --texto-secundario: #A7B4C5;
+
+  --sidebar-fondo: #070D18;
+  --sidebar-texto: #F1F5F9;
+  --sidebar-texto-secundario: #A7B4C5;
+  --sidebar-activo: #1B2A40;
+
+  --planta-necesita-agua: #FB923C;
+  --sombra: 0 1px 3px rgba(0, 0, 0, 0.28), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+body,
+.auth-shell {
   background: var(--fondo);
   color: var(--texto-principal);
+}
+
+input,
+select,
+textarea {
+  color-scheme: inherit;
+}
+
+hr {
+  border-color: var(--borde);
+}
+
+a {
+  color: var(--acento);
 }
 
 /* ---------- Botones ---------- */
@@ -51,6 +86,8 @@ body {
   border-radius: var(--radio);
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
   transition: background 0.15s ease;
 }
 .btn-primario:hover { background: var(--primario-hover); }
@@ -62,6 +99,12 @@ body {
   padding: 10px 20px;
   border-radius: var(--radio);
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-secundario:hover {
+  border-color: var(--texto-secundario);
+  color: var(--texto-principal);
 }
 
 .btn-gradiente {
@@ -72,6 +115,8 @@ body {
   border-radius: var(--radio);
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .btn-peligro {
@@ -85,7 +130,7 @@ body {
 
 /* ---------- Formularios ---------- */
 .campo { margin-bottom: 16px; }
-.campo label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+.campo label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 14px; color: var(--texto-principal); }
 .campo small { display: block; color: var(--texto-secundario); margin-bottom: 6px; font-size: 12px; }
 .campo input, .campo select, .campo textarea {
   width: 100%;
@@ -124,15 +169,16 @@ body {
   padding: 12px;
   border-bottom: 1px solid var(--borde);
   font-size: 14px;
+  color: var(--texto-principal);
 }
 .tabla-lista tr:hover { background: var(--fondo); }
 
 /* ---------- Badges (etiquetas de estado) ---------- */
 .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
-.badge-fijo { background: rgba(99,102,241,0.12); color: var(--gasto-fijo); }
-.badge-variable { background: rgba(249,115,22,0.12); color: var(--gasto-variable); }
-.badge-cumplida { background: rgba(34,197,94,0.12); color: var(--semaforo-verde); }
-.badge-progreso { background: rgba(99,102,241,0.12); color: var(--acento); }
+.badge-fijo { background: rgba(99,102,241,0.14); color: var(--gasto-fijo); }
+.badge-variable { background: rgba(249,115,22,0.14); color: var(--gasto-variable); }
+.badge-cumplida { background: rgba(34,197,94,0.14); color: var(--semaforo-verde); }
+.badge-progreso { background: rgba(99,102,241,0.14); color: var(--acento); }
 
 /* ---------- Semáforo financiero ---------- */
 .semaforo-punto { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
@@ -155,3 +201,14 @@ body {
 .alerta { padding: 12px 16px; border-radius: var(--radio); margin-bottom: 16px; font-size: 14px; }
 .alerta-exito { background: rgba(34,197,94,0.1); color: #15803D; border: 1px solid rgba(34,197,94,0.3); }
 .alerta-error { background: rgba(248,113,113,0.1); color: #B91C1C; border: 1px solid rgba(248,113,113,0.3); }
+
+:root[data-theme="dark"] .alerta-exito {
+  color: #86EFAC;
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(134, 239, 172, 0.32);
+}
+:root[data-theme="dark"] .alerta-error {
+  color: #FCA5A5;
+  background: rgba(248, 113, 113, 0.14);
+  border-color: rgba(252, 165, 165, 0.32);
+}

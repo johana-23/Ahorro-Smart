@@ -11,12 +11,7 @@ class GastoController extends Controller
 {
     public function index()
     {
-        $gastos = Gasto::where('usuario_idusuario', Auth::id())
-            ->with('categoria')
-            ->orderByDesc('fecha_gasto')
-            ->paginate(10);
-
-        return view('gastos.index', compact('gastos'));
+        return redirect()->route('movimientos.index', ['tab' => 'gastos']);
     }
 
     public function create()
@@ -36,7 +31,7 @@ class GastoController extends Controller
             'usuario_idusuario' => Auth::id(),
         ]);
 
-        return redirect()->route('gastos.index')->with('status', 'Gasto registrado correctamente.');
+        return redirect()->route('movimientos.index', ['tab' => 'gastos'])->with('status', 'Gasto registrado correctamente.');
     }
 
     public function edit(Gasto $gasto)
@@ -56,7 +51,7 @@ class GastoController extends Controller
 
         $gasto->update($data);
 
-        return redirect()->route('gastos.index')->with('status', 'Gasto actualizado correctamente.');
+        return redirect()->route('movimientos.index', ['tab' => 'gastos'])->with('status', 'Gasto actualizado correctamente.');
     }
 
     public function destroy(Gasto $gasto)
@@ -64,7 +59,7 @@ class GastoController extends Controller
         $this->autorizarPropietario($gasto);
         $gasto->delete();
 
-        return redirect()->route('gastos.index')->with('status', 'Gasto eliminado.');
+        return redirect()->route('movimientos.index', ['tab' => 'gastos'])->with('status', 'Gasto eliminado.');
     }
 
     /**

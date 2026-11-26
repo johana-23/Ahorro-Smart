@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@yield('title', 'Smart Ahorro')</title>
+    <script>
+      (() => {
+        const savedTheme = localStorage.getItem('smart-ahorro-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      })();
+    </script>
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}" />
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}" />
     @yield('extra-css')
@@ -29,11 +35,8 @@
           <a href="{{ route('perfil.edit') }}" class="{{ request()->routeIs('perfil.*') ? 'active' : '' }}">
             <i class="fa-regular fa-user"></i> Mi Perfil
           </a>
-          <a href="{{ route('ingresos.index') }}" class="{{ request()->routeIs('ingresos.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-arrow-up"></i> Ingresos
-          </a>
-          <a href="{{ route('gastos.index') }}" class="{{ request()->routeIs('gastos.*') ? 'active' : '' }}">
-            <i class="fa-solid fa-circle-arrow-down"></i> Gastos
+          <a href="{{ route('movimientos.index') }}" class="{{ request()->routeIs('movimientos.*', 'ingresos.*', 'gastos.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-right-left"></i> Movimientos
           </a>
           <a href="{{ route('metas.index') }}" class="{{ request()->routeIs('metas.*') ? 'active' : '' }}">
             <i class="fa-solid fa-bullseye"></i> Metas de ahorro
@@ -42,7 +45,8 @@
             <i class="fa-solid fa-chart-column"></i> Reportes
           </a>
           <a href="{{ route('historial.index') }}" class="{{ request()->routeIs('historial.*') ? 'active' : '' }}">
-            <i class="fa-regular fa-clock"></i> Historial</a>
+            <i class="fa-regular fa-clock"></i> Historial
+          </a>
         </nav>
       </aside>
 
@@ -54,6 +58,10 @@
           </div>
 
           <div class="usuario">
+            <button type="button" class="theme-toggle" data-theme-toggle aria-label="Cambiar tema">
+              <i class="fa-solid fa-moon" data-theme-icon></i>
+              <span data-theme-text>Modo oscuro</span>
+            </button>
             <a href="{{ route('notificaciones.index') }}" style="color:var(--texto-secundario);"><i class="fa-solid fa-bell"></i></a>
             <div class="perfil">
               <i class="fa-solid fa-user"></i>
@@ -75,5 +83,7 @@
         @yield('content')
       </main>
     </div>
+
+    <script src="{{ asset('js/theme-and-currency.js') }}"></script>
   </body>
 </html>

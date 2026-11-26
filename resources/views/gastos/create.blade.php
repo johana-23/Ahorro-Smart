@@ -11,7 +11,10 @@
 
       <div class="campo">
         <label for="monto">Monto</label>
-        <input type="number" step="0.01" min="0.01" name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
+        <div class="currency-field">
+          <span class="currency-prefix">$ COP</span>
+          <input type="text" inputmode="decimal" data-currency-input name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
+        </div>
       </div>
 
       <div class="campo">
@@ -59,7 +62,7 @@
       @endif
 
       <button type="submit" class="btn-primario">Guardar gasto</button>
-      <a href="{{ route('gastos.index') }}" class="btn-secundario">Cancelar</a>
+      <a href="{{ route('movimientos.index', ['tab' => 'gastos']) }}" class="btn-secundario">Cancelar</a>
     </form>
   </x-card>
 @endsection

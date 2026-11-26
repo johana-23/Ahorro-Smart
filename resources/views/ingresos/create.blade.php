@@ -10,10 +10,13 @@
       @csrf
 
       <div class="campo">
+        <div class="campo">
         <label for="monto">Monto</label>
-        <input type="number" step="0.01" min="0.01" name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
+        <div class="currency-field">
+          <span class="currency-prefix">$ COP</span>
+          <input type="text" inputmode="decimal" data-currency-input name="monto" id="monto" value="{{ old('monto') }}" placeholder="0" required />
+        </div>
       </div>
-
       <div class="campo">
         <label for="fecha_ingreso">Fecha</label>
         <input type="date" name="fecha_ingreso" id="fecha_ingreso" value="{{ old('fecha_ingreso', now()->format('Y-m-d')) }}" required />
@@ -31,7 +34,7 @@
       @endif
 
       <button type="submit" class="btn-primario">Guardar ingreso</button>
-      <a href="{{ route('ingresos.index') }}" class="btn-secundario">Cancelar</a>
+      <a href="{{ route('movimientos.index', ['tab' => 'ingresos']) }}" class="btn-secundario">Cancelar</a>
     </form>
   </x-card>
 @endsection
