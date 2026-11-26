@@ -28,7 +28,13 @@ public class RegistrationService {
             return users.saveAndFlush(new User(request.name().trim(), email,
                     encoder.encode(request.password()))).getId();
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "No fue posible registrar el usuario", e);
+            for (Throwable cause = e; cause != null; cause = cause.getCause()) {
+                if (cause instanceof java.sql.SQLException sql && sql.getErrorCode() == 1062
+                        && sql.getMessage() != null && sql.getMessage().contains("users_email_unique")) {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Correo ya registrado", e);
+                }
+            }
+            throw e;
         }
     }
 }

@@ -15,6 +15,7 @@ import com.smartahorro.smart_ahorro_api.dto.ResetPasswordRequest;
 import com.smartahorro.smart_ahorro_api.service.PasswordResetService;
 
 import jakarta.validation.Valid;
+import com.smartahorro.smart_ahorro_api.service.AuthRateLimitService;
 
 @RestController
 @RequestMapping(value = "/api/v1/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -22,12 +23,16 @@ public class PasswordResetController {
 
     private final PasswordResetService service;
 
-    public PasswordResetController(PasswordResetService service) {
+    private final AuthRateLimitService limits;
+
+    public PasswordResetController(PasswordResetService service, AuthRateLimitService limits) {
         this.service = service;
+        this.limits = limits;
     }
 
     @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        limits.check("forgot", request.email(), 3, 900);
         service.requestReset(request.email());
         return ResponseEntity.status(HttpStatus.ACCEPTED)
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
@@ -37,6 +42,7 @@ public class PasswordResetController {
 
     @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        limits.check("reset", request.email(), 5, 900);
         service.reset(request.email(), request.token(), request.password());
         return ResponseEntity.noContent()
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")

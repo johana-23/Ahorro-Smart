@@ -1,39 +1,25 @@
 package com.smartahorro.smart_ahorro_api.security;
-
-import java.time.Instant;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.Test;
-
 import com.smartahorro.smart_ahorro_api.service.TokenRevocationService;
-
+import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 class TokenRevocationServiceTests {
-
-    private final TokenRevocationService service = new TokenRevocationService();
-
-    @Test
-    void tokenRevocadoVigenteDebeSerRechazado() {
-        service.revoke("jti-1", Instant.now().plusSeconds(600));
-        assertTrue(service.isRevoked("jti-1"));
+    private final JdbcTemplate jdbc = mock(JdbcTemplate.class);
+    private final TokenRevocationService service = new TokenRevocationService(jdbc);
+    @Test void soloRegistroActivoSeAcepta() {
+        when(jdbc.queryForObject(anyString(), eq(Integer.class), eq("jti"), eq(1L))).thenReturn(1, 0);
+        assertTrue(service.isActive("jti", 1L));
+        assertFalse(service.isActive("jti", 1L));
     }
-
-    @Test
-    void tokenNoRevocadoDebeSerAceptado() {
-        assertFalse(service.isRevoked("otro"));
-        assertFalse(service.isRevoked(null));
+    @Test void rechazaIdentificadorAusente() {
+        assertFalse(service.isActive(null, 1L));
+        assertFalse(service.isActive("jti", 0L));
+        verifyNoInteractions(jdbc);
     }
-
-    @Test
-    void revocacionExpiradaSeDescarta() {
-        service.revoke("jti-2", Instant.now().minusSeconds(5));
-        assertFalse(service.isRevoked("jti-2"));
-    }
-
-    @Test
-    void ignoraDatosIncompletos() {
-        service.revoke(null, Instant.now().plusSeconds(60));
-        service.revoke("jti-3", null);
-        assertFalse(service.isRevoked("jti-3"));
+    @Test void revocaFamiliaEnPersistencia() {
+        service.revokeFamily("familia");
+        verify(jdbc).update(contains("revoked_at"), eq("familia"));
     }
 }

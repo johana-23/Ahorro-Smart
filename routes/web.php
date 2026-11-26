@@ -3,7 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MovimientoController;
 use App\Http\Controllers\IngresoController;
 use App\Http\Controllers\GastoController;
 use App\Http\Controllers\MetaAhorroController;
@@ -19,7 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->block(30, 30);
 
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
@@ -30,16 +29,20 @@ Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'
 Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
 
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->block(30, 30);
 
-// 'auth' = sesión web de Laravel; 'spring.auth' = JWT de Spring Boot vigente en la sesión.
-Route::middleware(['auth', 'spring.auth'])->group(function () {
+// Sesión de Auth independiente de Eloquent.
+Route::get('/auth/session', function () {
+    return response()->view('auth.session')->header('Cache-Control', 'no-store');
+})->middleware('spring.auth')->name('auth.session')->block(30, 30);
+
+// Los módulos legados se conservan, pero no se ejecutan durante la transición.
+Route::middleware([\App\Http\Middleware\BlockLegacyModules::class])->withoutMiddleware([\Illuminate\Routing\Middleware\SubstituteBindings::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/perfil', [PerfilController::class, 'edit'])->name('perfil.edit');
     Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
 
-    Route::get('/movimientos', [MovimientoController::class, 'index'])->name('movimientos.index');
     Route::resource('ingresos', IngresoController::class)->except(['show']);
     Route::resource('gastos', GastoController::class)->except(['show']);
 
@@ -50,7 +53,5 @@ Route::middleware(['auth', 'spring.auth'])->group(function () {
     Route::post('/notificaciones/{notificacion}/leida', [NotificacionController::class, 'marcarLeida'])->name('notificaciones.leida');
 
     Route::get('/historial', [HistorialController::class, 'index'])->name('historial.index');
-    Route::get('/historial/exportar/pdf', [HistorialController::class, 'exportarPdf'])->name('historial.exportar.pdf');
-    Route::get('/historial/exportar/excel', [HistorialController::class, 'exportarExcel'])->name('historial.exportar.excel');
     Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
 });

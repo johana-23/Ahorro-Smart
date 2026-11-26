@@ -40,7 +40,7 @@ class AuthServiceTests {
         when(user.getId()).thenReturn(1L);
         when(user.getPassword()).thenReturn("hash-bcrypt");
 
-        when(userRepository.findByEmail("usuario@ejemplo.com"))
+        when(userRepository.findByEmailForUpdate("usuario@ejemplo.com"))
                 .thenReturn(Optional.of(user));
 
         when(passwordEncoder.matches(
@@ -63,7 +63,7 @@ class AuthServiceTests {
 
         when(user.getPassword()).thenReturn("hash-bcrypt");
 
-        when(userRepository.findByEmail("usuario@ejemplo.com"))
+        when(userRepository.findByEmailForUpdate("usuario@ejemplo.com"))
                 .thenReturn(Optional.of(user));
 
         when(passwordEncoder.matches(
@@ -83,7 +83,7 @@ class AuthServiceTests {
     @Test
     void debeRechazarCorreoInexistente() {
 
-        when(userRepository.findByEmail("noexiste@ejemplo.com"))
+        when(userRepository.findByEmailForUpdate("noexiste@ejemplo.com"))
                 .thenReturn(Optional.empty());
 
         assertThrows(

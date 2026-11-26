@@ -10,6 +10,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import com.smartahorro.smart_ahorro_api.service.TokenRevocationService;
+import static org.mockito.Mockito.when;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -29,16 +32,22 @@ class JwtConfigIntegrationTests {
     @Autowired
     private JwtDecoder jwtDecoder;
 
+    @MockitoBean
+    private TokenRevocationService revocations;
+
     @Test
     void debeFirmarYValidarJwtRS256() {
 
         Instant now = Instant.now();
+        when(revocations.isActive("jti-test", 1L)).thenReturn(true);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("https://auth.smart-ahorro.local")
                 .subject("1")
                 .audience(java.util.List.of("smart-ahorro-api"))
                 .issuedAt(now)
+                .notBefore(now)
+                .id("jti-test")
                 .expiresAt(now.plus(15, ChronoUnit.MINUTES))
                 .build();
 
@@ -169,12 +178,17 @@ class JwtConfigIntegrationTests {
         ) {
 
             Instant now = Instant.now();
+            when(revocations.isActive("jti-test", 1L)).thenReturn(true);
+            Instant issuedAt = expiration.minusSeconds(900);
+            if (issuedAt.isAfter(now)) issuedAt = now;
 
             JwtClaimsSet claims = JwtClaimsSet.builder()
                     .issuer(issuer)
                     .subject(subject)
                     .audience(audience)
-                    .issuedAt(now.minusSeconds(7200))
+                    .issuedAt(issuedAt)
+                    .notBefore(issuedAt)
+                    .id("jti-test")
                     .expiresAt(expiration)
                     .build();
 

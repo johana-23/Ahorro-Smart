@@ -19,7 +19,11 @@ class RegisterRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'min:4', 'max:100'],
             'email' => ['required', 'string', 'email', 'max:150'],
-            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed'],
+            'password' => ['required', 'string', 'min:8', 'max:72', 'confirmed', function ($attribute, $value, $fail) {
+                if (is_string($value) && strlen($value) > 72) {
+                    $fail('La contraseña no puede superar 72 bytes UTF-8.');
+                }
+            }],
         ];
     }
 

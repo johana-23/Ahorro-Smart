@@ -1,46 +1,33 @@
 package com.smartahorro.smart_ahorro_api.service;
 
-import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Lista de tokens revocados (por jti) hasta su expiracion natural.
- * Se almacena en memoria: se pierde al reiniciar y no se comparte entre instancias.
- * Como el access token dura 15 minutos, el riesgo se limita a esa ventana.
- */
+/** Estado persistente de los JWT emitidos. Un JWT sin registro activo no es aceptado. */
 @Service
 public class TokenRevocationService {
+    private final JdbcTemplate jdbc;
+    public TokenRevocationService(JdbcTemplate jdbc) { this.jdbc = jdbc; }
 
-    private final Map<String, Instant> revoked = new ConcurrentHashMap<>();
-
-    public void revoke(String jti, Instant expiresAt) {
-        if (jti == null || jti.isBlank() || expiresAt == null) {
-            return;
-        }
-        purgeExpired();
-        revoked.put(jti, expiresAt);
+    public boolean isActive(String jti, long userId) {
+        if (jti == null || jti.isBlank() || userId <= 0) return false;
+        Integer count = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM refresh_tokens
+                WHERE access_jti = ? AND user_id = ? AND consumed_at IS NULL
+                  AND revoked_at IS NULL AND access_expires_at > UTC_TIMESTAMP(6)
+                  AND expires_at > UTC_TIMESTAMP(6)
+                """, Integer.class, jti, userId);
+        return count != null && count == 1;
     }
 
-    public boolean isRevoked(String jti) {
-        if (jti == null) {
-            return false;
-        }
-        Instant expiresAt = revoked.get(jti);
-        if (expiresAt == null) {
-            return false;
-        }
-        if (!expiresAt.isAfter(Instant.now())) {
-            revoked.remove(jti);
-            return false;
-        }
-        return true;
+    @Transactional
+    public void revokeFamily(String familyId) {
+        jdbc.update("UPDATE refresh_tokens SET revoked_at = UTC_TIMESTAMP(6) WHERE family_id = ? AND revoked_at IS NULL", familyId);
     }
 
-    private void purgeExpired() {
-        Instant now = Instant.now();
-        revoked.values().removeIf(expiresAt -> !expiresAt.isAfter(now));
+    @Transactional
+    public void revokeUser(long userId) {
+        jdbc.update("UPDATE refresh_tokens SET revoked_at = UTC_TIMESTAMP(6) WHERE user_id = ? AND revoked_at IS NULL", userId);
     }
 }

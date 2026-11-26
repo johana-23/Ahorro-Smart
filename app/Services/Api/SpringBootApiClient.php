@@ -34,7 +34,7 @@ final class SpringBootApiClient
             throw new RuntimeException('Ruta API no permitida');
         }
         try {
-            $request = Http::acceptJson()->asJson()->timeout(10)->connectTimeout(3);
+            $request = Http::acceptJson()->asJson()->timeout(15)->connectTimeout(3)->withOptions(['allow_redirects' => false]);
             if ($token !== null) {
                 $request = $request->withToken($token);
             }
