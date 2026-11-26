@@ -23,32 +23,28 @@ public class PasswordResetMailer {
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String baseUrl;
     private final String from;
-    private final boolean logLink;
+    private final long ttlMinutes;
 
     public PasswordResetMailer(
             ObjectProvider<JavaMailSender> mailSender,
             @Value("${smart-ahorro.password-reset.base-url}") String baseUrl,
             @Value("${smart-ahorro.mail.from}") String from,
-            @Value("${smart-ahorro.password-reset.log-link:false}") boolean logLink
+            @Value("${smart-ahorro.password-reset.ttl-minutes:60}") long ttlMinutes
     ) {
         this.mailSender = mailSender;
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
         this.from = from;
-        this.logLink = logLink;
+        this.ttlMinutes = ttlMinutes;
     }
 
-    public void sendResetLink(String email, String token) {
+    public boolean sendResetLink(String email, String token) {
         String link = baseUrl + "/reset-password/" + token
                 + "?email=" + URLEncoder.encode(email, StandardCharsets.UTF_8);
 
         JavaMailSender sender = mailSender.getIfAvailable();
         if (sender == null) {
-            if (logLink) {
-                logger.warn("SMTP no configurado (modo desarrollo). Enlace de recuperacion: {}", link);
-            } else {
-                logger.warn("SMTP no configurado: no se envio el enlace de recuperacion.");
-            }
-            return;
+            logger.warn("SMTP no configurado: no se envio el enlace de recuperacion.");
+            return false;
         }
 
         try {
@@ -57,12 +53,14 @@ public class PasswordResetMailer {
             message.setTo(email);
             message.setSubject("Smart Ahorro - Recuperacion de contrasena");
             message.setText("Recibimos una solicitud para restablecer tu contrasena.\n\n"
-                    + "Usa este enlace (vence en 60 minutos y solo funciona una vez):\n"
+                    + "Usa este enlace (vence en " + ttlMinutes + " minutos y solo funciona una vez):\n"
                     + link + "\n\n"
                     + "Si no fuiste tu, ignora este mensaje.");
             sender.send(message);
+            return true;
         } catch (RuntimeException e) {
-            logger.error("No fue posible enviar el correo de recuperacion", e);
+            logger.warn("No fue posible enviar el correo de recuperacion: {}", e.getClass().getSimpleName());
+            return false;
         }
     }
 }

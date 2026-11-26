@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
                 request.getRequestURI()
         );
 
-        return ResponseEntity.status(status).body(response);
+        return ResponseEntity.status(status).header("Cache-Control", "no-store").body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -133,13 +133,14 @@ public class GlobalExceptionHandler {
             case 403 -> "FORBIDDEN";
             case 404 -> "NOT_FOUND";
             case 409 -> "CONFLICT";
+            case 429 -> "TOO_MANY_REQUESTS";
             default -> "HTTP_ERROR";
         };
 
         return buildResponse(
                 status,
                 error,
-                "No fue posible procesar la solicitud",
+                status.value() == 429 ? "Demasiadas solicitudes. Intenta mas tarde." : "No fue posible procesar la solicitud",
                 request
         );
     }

@@ -12,19 +12,44 @@ final class AuthApiService
         $response = $this->client->post('/api/v1/auth/login', [
             'email' => $email, 'password' => $password,
         ]);
+        return $this->parseTokens($response);
+    }
+
+    public function refresh(string $refreshToken): array
+    {
+        return $this->parseTokens($this->client->post('/api/v1/auth/refresh', [
+            'refreshToken' => $refreshToken,
+        ]));
+    }
+
+    private function parseTokens(\Illuminate\Http\Client\Response $response): array
+    {
+        $this->checkRateLimit($response);
         if ($response->status() === 401) {
             throw new InvalidApiCredentialsException();
         }
-        if (!$response->successful()) {
+        if ($response->status() !== 200) {
             throw new RuntimeException('La autenticacion no esta disponible');
         }
         $data = $response->json();
         if (!is_array($data) || !is_string($data['accessToken'] ?? null)
+            || trim($data['accessToken']) === ''
             || ($data['tokenType'] ?? null) !== 'Bearer'
-            || !is_numeric($data['expiresIn'] ?? null)) {
+            || ($data['expiresIn'] ?? null) !== 900
+            || !is_string($data['refreshToken'] ?? null)
+            || !preg_match('/\A[A-Za-z0-9_-]{43}\z/', $data['refreshToken'])
+            || !is_int($data['refreshExpiresIn'] ?? null)
+            || $data['refreshExpiresIn'] <= 0 || $data['refreshExpiresIn'] > 604800) {
             throw new RuntimeException('Respuesta de autenticacion invalida');
         }
         return $data;
+    }
+
+    private function checkRateLimit(\Illuminate\Http\Client\Response $response): void
+    {
+        if ($response->status() === 429) {
+            throw new ApiRateLimitException();
+        }
     }
 
     /** Devuelve ['userId' => int] o null si el token ya no es válido. */
@@ -38,8 +63,8 @@ final class AuthApiService
             throw new RuntimeException('No fue posible validar la sesion');
         }
         $data = $response->json();
-        if (!is_array($data) || !is_numeric($data['userId'] ?? null)) {
-            return null;
+        if (!is_array($data) || !is_int($data['userId'] ?? null) || $data['userId'] <= 0) {
+            throw new RuntimeException('Respuesta de identidad invalida');
         }
         return ['userId' => (int) $data['userId']];
     }
@@ -49,20 +74,26 @@ final class AuthApiService
         $response = $this->client->post('/api/v1/auth/register', [
             'name' => $name, 'email' => $email, 'password' => $password,
         ]);
+        $this->checkRateLimit($response);
         if ($response->status() === 409) {
             throw new DuplicateApiEmailException();
         }
-        if (!$response->successful()) {
+        if ($response->status() !== 201) {
             throw new RuntimeException('No fue posible registrar el usuario');
         }
-        return (array) $response->json();
+        $data = $response->json();
+        if (!is_array($data) || !is_int($data['userId'] ?? null) || $data['userId'] <= 0) {
+            throw new RuntimeException('Respuesta de registro invalida');
+        }
+        return $data;
     }
 
-    /** Revoca el token en Spring Boot. 401 se considera ya cerrado. */
-    public function logout(string $token): void
+    /** Revoca toda la familia aunque el JWT haya expirado. */
+    public function logout(string $refreshToken): void
     {
-        $response = $this->client->post('/api/v1/auth/logout', [], $token);
-        if (!$response->successful() && $response->status() !== 401) {
+        $response = $this->client->post('/api/v1/auth/logout', ['refreshToken' => $refreshToken]);
+        $this->checkRateLimit($response);
+        if ($response->status() !== 204) {
             throw new RuntimeException('No fue posible cerrar la sesion en la API');
         }
     }
@@ -70,7 +101,8 @@ final class AuthApiService
     public function forgotPassword(string $email): void
     {
         $response = $this->client->post('/api/v1/auth/forgot-password', ['email' => $email]);
-        if (!$response->successful()) {
+        $this->checkRateLimit($response);
+        if ($response->status() !== 202) {
             throw new RuntimeException('No fue posible solicitar la recuperacion');
         }
     }
@@ -80,10 +112,11 @@ final class AuthApiService
         $response = $this->client->post('/api/v1/auth/reset-password', [
             'email' => $email, 'token' => $token, 'password' => $password,
         ]);
+        $this->checkRateLimit($response);
         if ($response->status() === 400) {
             throw new InvalidResetTokenException();
         }
-        if (!$response->successful()) {
+        if ($response->status() !== 204) {
             throw new RuntimeException('No fue posible restablecer la contrasena');
         }
     }

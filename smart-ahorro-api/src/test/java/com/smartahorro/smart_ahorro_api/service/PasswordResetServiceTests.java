@@ -29,6 +29,7 @@ class PasswordResetServiceTests {
     private PasswordEncoder encoder;
     private PasswordResetMailer mailer;
     private PasswordResetService service;
+    private TokenRevocationService revocations;
 
     @BeforeEach
     void setUp() {
@@ -36,12 +37,13 @@ class PasswordResetServiceTests {
         tokens = mock(PasswordResetTokenRepository.class);
         encoder = mock(PasswordEncoder.class);
         mailer = mock(PasswordResetMailer.class);
-        service = new PasswordResetService(users, tokens, encoder, mailer, 60, 60);
+        revocations = mock(TokenRevocationService.class);
+        service = new PasswordResetService(users, tokens, encoder, mailer, revocations, 60, 60);
     }
 
     @Test
     void correoInexistenteNoGeneraTokenNiCorreo() {
-        when(users.findByEmail("no@existe.com")).thenReturn(Optional.empty());
+        when(users.findByEmailForUpdate("no@existe.com")).thenReturn(Optional.empty());
 
         service.requestReset("No@Existe.com");
 
@@ -51,9 +53,12 @@ class PasswordResetServiceTests {
 
     @Test
     void correoExistenteGeneraTokenHasheadoYEnviaEnlace() {
-        when(users.findByEmail("a@b.com")).thenReturn(Optional.of(mock(User.class)));
+        User user = mock(User.class);
+        when(user.getEmail()).thenReturn("a@b.com");
+        when(users.findByEmailForUpdate("a@b.com")).thenReturn(Optional.of(user));
         when(tokens.findById("a@b.com")).thenReturn(Optional.empty());
         when(encoder.encode(anyString())).thenReturn("hash");
+        when(mailer.sendResetLink(anyString(), anyString())).thenReturn(true);
 
         service.requestReset("A@B.com");
 
@@ -63,7 +68,9 @@ class PasswordResetServiceTests {
 
     @Test
     void solicitudRepetidaDentroDelIntervaloSeIgnora() {
-        when(users.findByEmail("a@b.com")).thenReturn(Optional.of(mock(User.class)));
+        User user = mock(User.class);
+        when(user.getEmail()).thenReturn("a@b.com");
+        when(users.findByEmailForUpdate("a@b.com")).thenReturn(Optional.of(user));
         when(tokens.findById("a@b.com")).thenReturn(Optional.of(
                 new PasswordResetToken("a@b.com", "hash", LocalDateTime.now())));
 
@@ -76,25 +83,29 @@ class PasswordResetServiceTests {
     @Test
     void tokenValidoCambiaLaContrasenaYSeConsume() {
         User user = mock(User.class);
+        when(user.getEmail()).thenReturn("a@b.com");
+        when(user.getId()).thenReturn(1L);
         PasswordResetToken row = new PasswordResetToken("a@b.com", "hash", LocalDateTime.now());
         when(tokens.findById("a@b.com")).thenReturn(Optional.of(row));
         when(encoder.matches("token-plano", "hash")).thenReturn(true);
         when(encoder.encode("NuevaClave123")).thenReturn("nuevo-hash");
-        when(users.findByEmail("a@b.com")).thenReturn(Optional.of(user));
+        when(users.findByEmailForUpdate("a@b.com")).thenReturn(Optional.of(user));
 
         service.reset("a@b.com", "token-plano", "NuevaClave123");
 
         verify(user).changePassword("nuevo-hash");
         verify(tokens).delete(row);
+        verify(revocations).revokeUser(1L);
     }
 
     @Test
     void tokenExpiradoSeRechaza() {
         User user = mock(User.class);
+        when(user.getEmail()).thenReturn("a@b.com");
         when(tokens.findById("a@b.com")).thenReturn(Optional.of(
                 new PasswordResetToken("a@b.com", "hash", LocalDateTime.now().minusMinutes(61))));
         when(encoder.matches(anyString(), anyString())).thenReturn(true);
-        when(users.findByEmail("a@b.com")).thenReturn(Optional.of(user));
+        when(users.findByEmailForUpdate("a@b.com")).thenReturn(Optional.of(user));
 
         assertThrows(ResponseStatusException.class,
                 () -> service.reset("a@b.com", "token-plano", "NuevaClave123"));
@@ -104,10 +115,11 @@ class PasswordResetServiceTests {
     @Test
     void tokenIncorrectoSeRechaza() {
         User user = mock(User.class);
+        when(user.getEmail()).thenReturn("a@b.com");
         when(tokens.findById("a@b.com")).thenReturn(Optional.of(
                 new PasswordResetToken("a@b.com", "hash", LocalDateTime.now())));
         when(encoder.matches("otro", "hash")).thenReturn(false);
-        when(users.findByEmail("a@b.com")).thenReturn(Optional.of(user));
+        when(users.findByEmailForUpdate("a@b.com")).thenReturn(Optional.of(user));
 
         assertThrows(ResponseStatusException.class,
                 () -> service.reset("a@b.com", "otro", "NuevaClave123"));

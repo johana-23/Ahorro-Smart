@@ -27,6 +27,7 @@ public class PasswordResetService {
     private final PasswordResetTokenRepository tokens;
     private final PasswordEncoder encoder;
     private final PasswordResetMailer mailer;
+    private final TokenRevocationService revocations;
     private final long ttlMinutes;
     private final long resendSeconds;
 
@@ -35,6 +36,7 @@ public class PasswordResetService {
             PasswordResetTokenRepository tokens,
             PasswordEncoder encoder,
             PasswordResetMailer mailer,
+            TokenRevocationService revocations,
             @Value("${smart-ahorro.password-reset.ttl-minutes:60}") long ttlMinutes,
             @Value("${smart-ahorro.password-reset.resend-seconds:60}") long resendSeconds
     ) {
@@ -42,6 +44,7 @@ public class PasswordResetService {
         this.tokens = tokens;
         this.encoder = encoder;
         this.mailer = mailer;
+        this.revocations = revocations;
         this.ttlMinutes = ttlMinutes;
         this.resendSeconds = resendSeconds;
     }
@@ -54,11 +57,12 @@ public class PasswordResetService {
     public void requestReset(String rawEmail) {
         String email = normalize(rawEmail);
 
-        Optional<User> user = users.findByEmail(email);
+        Optional<User> user = users.findByEmailForUpdate(email);
         if (user.isEmpty()) {
             return;
         }
 
+        email = user.get().getEmail();
         Optional<PasswordResetToken> existing = tokens.findById(email);
         if (existing.isPresent()
                 && existing.get().getCreatedAt() != null
@@ -71,7 +75,10 @@ public class PasswordResetService {
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
 
         tokens.save(new PasswordResetToken(email, encoder.encode(token), LocalDateTime.now()));
-        mailer.sendResetLink(email, token);
+        if (!mailer.sendResetLink(email, token)) {
+            // No dejar un token nuevo que no pudo entregarse; se conserva la respuesta genérica.
+            tokens.deleteById(email);
+        }
     }
 
     /**
@@ -81,20 +88,22 @@ public class PasswordResetService {
     public void reset(String rawEmail, String token, String newPassword) {
         String email = normalize(rawEmail);
 
+        User user = users.findByEmailForUpdate(email).orElseThrow(PasswordResetService::invalidToken);
+
+        email = user.getEmail();
         PasswordResetToken stored = tokens.findById(email)
                 .orElseThrow(PasswordResetService::invalidToken);
 
         if (stored.getCreatedAt() == null
-                || stored.getCreatedAt().plusMinutes(ttlMinutes).isBefore(LocalDateTime.now())
+                || !stored.getCreatedAt().plusMinutes(ttlMinutes).isAfter(LocalDateTime.now())
                 || !encoder.matches(token, stored.getToken())) {
             throw invalidToken();
         }
 
-        User user = users.findByEmail(email).orElseThrow(PasswordResetService::invalidToken);
-
         user.changePassword(encoder.encode(newPassword));
         users.save(user);
         tokens.delete(stored);
+        revocations.revokeUser(user.getId());
     }
 
     private static String normalize(String email) {

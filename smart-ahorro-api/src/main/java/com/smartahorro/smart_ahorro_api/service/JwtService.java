@@ -3,7 +3,6 @@ package com.smartahorro.smart_ahorro_api.service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
@@ -35,7 +34,7 @@ public class JwtService {
         this.lifetimeMinutes = lifetimeMinutes;
     }
 
-    public LoginResponse issueAccessToken(Long userId) {
+    public LoginResponse issueAccessToken(Long userId, String jti) {
         if (userId == null || userId <= 0) {
             throw new IllegalArgumentException("Identificador de usuario invalido");
         }
@@ -47,7 +46,7 @@ public class JwtService {
                 .issuedAt(now)
                 .notBefore(now)
                 .expiresAt(now.plus(lifetimeMinutes, ChronoUnit.MINUTES))
-                .id(UUID.randomUUID().toString())
+                .id(jti)
                 .build();
         JwsHeader header = JwsHeader.with(SignatureAlgorithm.RS256).build();
         String token = encoder.encode(JwtEncoderParameters.from(header, claims)).getTokenValue();

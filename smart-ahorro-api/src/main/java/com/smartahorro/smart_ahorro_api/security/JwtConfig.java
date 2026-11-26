@@ -74,7 +74,7 @@ public JwtDecoder jwtDecoder(
 
     OAuth2TokenValidator<Jwt> audienceValidator = jwt -> {
 
-        if (jwt.getAudience().contains(audience)) {
+        if (jwt.getAudience() != null && jwt.getAudience().contains(audience)) {
             return OAuth2TokenValidatorResult.success();
         }
 
@@ -111,14 +111,14 @@ public JwtDecoder jwtDecoder(
 
     OAuth2TokenValidator<Jwt> expirationRequiredValidator = jwt -> {
 
-        if (jwt.getExpiresAt() != null) {
+        if (jwt.getExpiresAt() != null && jwt.getExpiresAt().isAfter(java.time.Instant.now())) {
             return OAuth2TokenValidatorResult.success();
         }
 
         return OAuth2TokenValidatorResult.failure(
                 new OAuth2Error(
                         "invalid_token",
-                        "El JWT debe incluir expiracion",
+                        "El JWT debe incluir una expiracion vigente",
                         null
                 )
         );
@@ -128,6 +128,8 @@ public JwtDecoder jwtDecoder(
         java.time.Instant issuedAt = jwt.getIssuedAt();
         java.time.Instant expiresAt = jwt.getExpiresAt();
         if (issuedAt != null && expiresAt != null
+                && !issuedAt.isAfter(java.time.Instant.now())
+                && jwt.getNotBefore() != null && !jwt.getNotBefore().isAfter(java.time.Instant.now())
                 && expiresAt.isAfter(issuedAt)
                 && !expiresAt.isAfter(issuedAt.plusSeconds(900))) {
             return OAuth2TokenValidatorResult.success();
@@ -137,7 +139,15 @@ public JwtDecoder jwtDecoder(
     };
 
     OAuth2TokenValidator<Jwt> revocationValidator = jwt -> {
-        if (revocationService.isRevoked(jwt.getId())) {
+        boolean active = false;
+        try {
+            if (jwt.getSubject() != null) {
+                active = revocationService.isActive(jwt.getId(), Long.parseLong(jwt.getSubject()));
+            }
+        } catch (NumberFormatException | org.springframework.dao.DataAccessException ignored) {
+            // Fallar cerrado si el identificador es inválido o la persistencia no responde.
+        }
+        if (!active) {
             return OAuth2TokenValidatorResult.failure(
                     new OAuth2Error("invalid_token", "Token revocado", null));
         }

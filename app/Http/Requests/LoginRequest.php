@@ -14,8 +14,12 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string', 'min:8'],
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string', 'min:8', 'max:72', function ($attribute, $value, $fail) {
+                if (is_string($value) && strlen($value) > 72) {
+                    $fail('La contraseña no puede superar 72 bytes UTF-8.');
+                }
+            }],
         ];
     }
 

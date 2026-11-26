@@ -12,7 +12,11 @@ public record LoginRequest(
         String email,
 
         @NotBlank(message = "La contrasena es obligatoria")
-        String password
+        @Size(min = 8, max = 72) String password
 
 ) {
+    @jakarta.validation.constraints.AssertTrue(message = "La contrasena no puede superar 72 bytes UTF-8")
+    public boolean isPasswordByteLengthValid() {
+        return password == null || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= 72;
+    }
 }

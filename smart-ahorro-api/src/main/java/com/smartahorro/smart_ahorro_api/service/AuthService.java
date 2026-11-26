@@ -22,15 +22,16 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public Long authenticate(String email, String password) {
 
         if (email == null || email.isBlank()
-                || password == null || password.isBlank()) {
+                || password == null || password.isBlank()
+                || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             throw invalidCredentials();
         }
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailForUpdate(email.trim().toLowerCase(java.util.Locale.ROOT))
                 .orElseThrow(this::invalidCredentials);
 
         if (!passwordEncoder.matches(

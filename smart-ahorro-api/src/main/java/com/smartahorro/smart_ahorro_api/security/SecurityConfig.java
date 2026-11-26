@@ -1,4 +1,3 @@
-
 package com.smartahorro.smart_ahorro_api.security;
 
 import java.io.IOException;
@@ -41,7 +40,7 @@ public class SecurityConfig {
             .requestCache(cache -> cache.disable())
             .authorizeHttpRequests(auth -> auth
                     .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/logout").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/forgot-password").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll()
