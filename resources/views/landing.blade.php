@@ -6,8 +6,8 @@
     <script>
       document.documentElement.setAttribute('data-theme', localStorage.getItem('smart-ahorro-theme') || 'light');
     </script>
-    <title>Smart Ahorro — Ahorra con hábito, no con fuerza de voluntad</title>
-    <meta name="description" content="Registra tus ingresos y gastos, define metas de ahorro y deja que el semáforo financiero y la planta de ahorro te muestren si vas por buen camino." />
+    <title>Smart Ahorro — Gestión y planificación financiera inteligente</title>
+    <meta name="description" content="Administra ingresos y gastos, analiza tu situación financiera, planifica metas de ahorro, consulta reportes y recibe recomendaciones orientativas con IA." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
@@ -39,9 +39,9 @@
         <div>
           <h1>El ahorro no falla por falta de plata. Falla por falta de hábito.</h1>
           <p class="sub">
-            Smart Ahorro registra tus ingresos y gastos, calcula cuánto debes aportar a
-            cada meta, y usa un semáforo financiero y una planta que crece con tu
-            constancia — para que ahorrar se sienta como un hábito, no como una tarea pendiente.
+            Smart Ahorro registra tus ingresos y gastos, analiza tu situación financiera,
+            calcula planes de ahorro para tus metas y apoya tu seguimiento con semáforo
+            financiero, planta de ahorro y recomendaciones orientativas con IA.
           </p>
           <div class="landing-cta-group">
             <a href="{{ route('register') }}" class="btn-primario">Crear cuenta gratis</a>
@@ -68,25 +68,25 @@
         <div class="landing-pasos">
           <div class="landing-paso">
             <p class="num">Paso 1</p>
-            <h3>Registra ingresos y gastos</h3>
-            <p>Lleva el control de tu dinero en minutos, clasificando cada gasto como fijo o variable.</p>
+            <h3>Registra y analiza movimientos</h3>
+            <p>Registra ingresos y gastos, revisa tus saldos y conoce indicadores de tu situación financiera.</p>
           </div>
           <div class="landing-paso">
             <p class="num">Paso 2</p>
-            <h3>Define una meta</h3>
-            <p>Dinos cuánto quieres ahorrar y en cuántos meses. Nosotros calculamos lo que debes aportar.</p>
+            <h3>Planifica y proyecta metas</h3>
+            <p>Define monto objetivo y plazo, ajusta planes de ahorro y simula escenarios para estimar el tiempo de cumplimiento.</p>
           </div>
           <div class="landing-paso">
             <p class="num">Paso 3</p>
             <h3>Cuida tu constancia</h3>
-            <p>Tu planta de ahorro y tu semáforo financiero te avisan si vas por buen camino, antes de que sea tarde.</p>
+            <p>Tu planta de ahorro, tu semáforo financiero y las recomendaciones con IA acompañan tus hábitos de ahorro.</p>
           </div>
         </div>
       </section>
 
       <section class="landing-section">
         <h2>Lo que hace distinto a Smart Ahorro</h2>
-        <p class="intro">La mayoría de apps de finanzas te muestran números. Esta también te muestra si mantienes el hábito.</p>
+        <p class="intro">La mayoría de apps de finanzas te muestran números. Esta también te ayuda a analizarlos, planificar tus metas y sostener el hábito.</p>
 
         <div style="margin-top:32px;">
           <div class="landing-feature">
@@ -106,15 +106,15 @@
           <div class="landing-feature">
             <div class="barra" style="background:var(--semaforo-amarillo);"></div>
             <div>
-              <h3>Metas con cálculo automático</h3>
-              <p>Define cuánto y para cuándo. Smart Ahorro calcula cuánto debes aportar cada mes para lograrlo.</p>
+              <h3>Metas, planes y simulaciones</h3>
+              <p>Calcula el aporte requerido según monto y plazo, ajusta planes de ahorro y proyecta escenarios antes de guardar cambios.</p>
             </div>
           </div>
           <div class="landing-feature">
             <div class="barra" style="background:var(--texto-principal);"></div>
             <div>
-              <h3>Reportes y recomendaciones</h3>
-              <p>Gráficas de tus hábitos de gasto y sugerencias basadas en tu comportamiento financiero real, no en reglas genéricas.</p>
+              <h3>Reportes y recomendaciones con IA</h3>
+              <p>Reportes e indicadores de tus hábitos de gasto junto con recomendaciones orientativas generadas con IA a partir de datos calculados por el sistema.</p>
             </div>
           </div>
         </div>
