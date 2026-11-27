@@ -129,7 +129,7 @@
       </section>
 
       <footer class="landing-footer">
-        <span>Smart Ahorro — Proyecto académico, SENA · Ingeniería del Software I</span>
+        <span>Smart Ahorro — Proyecto académico, SENA · ADSO</span>
         <span>&copy; {{ date('Y') }}</span>
       </footer>
     </div>
